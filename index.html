@@ -8,93 +8,59 @@
 		<script src="js/jquery.mobile-1.1.0.min.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/cordova-1.8.1.js"></script>
 		<script type="text/javascript" charset="utf-8">
-		
-		    var pictureSource;   // picture source
-		    var destinationType; // sets the format of returned value 
-		
-		    // Wait for Cordova to connect with the device
-		    //
+		 	var db 
+			
+			$(document).ready(function(){
+				onDeviceReady();
+				$('#btoAgregar').click(function(e){
+					e.preventDefault();
+					agregarAlumno($('#txtNombre').val());
+					$('#txtNombre').val('');
+				});
+			});
+		    
 		    document.addEventListener("deviceready",onDeviceReady,false);
-		
-		    // Cordova is ready to be used!
-		    //
+	
+			// PhoneGap esta listo
 		    function onDeviceReady() {
-		        pictureSource=navigator.camera.PictureSourceType;
-		        destinationType=navigator.camera.DestinationType;
+		        db = window.openDatabase("shitoryu", "1.0", "ShitoRyu", 200000);
+		        db.transaction(function(tx) {
+		        	tx.executeSql('CREATE TABLE IF NOT EXISTS alumnos (ALUM_Codigo integer primary key autoincrement, ALUM_Nombre)');
+		        	pintarAlumnos();	
+		        });
 		    }
+
+			function agregarAlumno(nombre){
+				db.transaction(function(tx) {
+					tx.executeSql('INSERT INTO alumnos (ALUM_Nombre) VALUES (?)',[nombre],function(tx){pintarAlumno(nombre);});
+				});
+			}	
+			
+			function pintarAlumnos(){
+			  db.transaction(function(tx) {
+    			tx.executeSql('SELECT ALUM_Nombre as nombre FROM alumnos', [], function(tx, results) {
+	      			var len=results.rows.length;
+	      			var i;
+	      			for(i=0; i<len; i++)
+	      				pintarAlumno(results.rows.item(i).nombre);
+	    		});
+  		      });
+			}	    
 		
-		    // Called when a photo is successfully retrieved
+			function pintarAlumno(nombre){
+				$('#ulAlumnos').append("<li><a href='#'>"+nombre+"</a></li>");
+			}
+			
+			
+		    // Función 'callback' de error de transacción
 		    //
-		    function onPhotoDataSuccess(imageData) {
-		      // Uncomment to view the base64 encoded image data
-		      // console.log(imageData);
-		
-		      // Get image handle
-		      //
-		      var smallImage = document.getElementById('smallImage');
-		
-		      // Unhide image elements
-		      //
-		      smallImage.style.display = 'block';
-		
-		      // Show the captured photo
-		      // The inline CSS rules are used to resize the image
-		      //
-		      smallImage.src = "data:image/jpeg;base64," + imageData;
+		    function errorCB(err) {
+		        alert("Error procesando SQL: "+err);
 		    }
 		
-		    // Called when a photo is successfully retrieved
-		    //
-		    function onPhotoURISuccess(imageURI) {
-		      // Uncomment to view the image file URI 
-		      // console.log(imageURI);
-		
-		      // Get image handle
-		      //
-		      var largeImage = document.getElementById('largeImage');
-		
-		      // Unhide image elements
-		      //
-		      largeImage.style.display = 'block';
-		
-		      // Show the captured photo
-		      // The inline CSS rules are used to resize the image
-		      //
-		      largeImage.src = imageURI;
-		    }
-		
-		    // A button will call this function
-		    //
-		    function capturePhoto() {
-		      // Take picture using device camera and retrieve image as base64-encoded string
-		      navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 50,
-		        destinationType: destinationType.DATA_URL });
-		    }
-		
-		    // A button will call this function
-		    //
-		    function capturePhotoEdit() {
-		      // Take picture using device camera, allow edit, and retrieve image as base64-encoded string  
-		      navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 20, allowEdit: true,
-		        destinationType: destinationType.DATA_URL });
-		    }
-		
-		    // A button will call this function
-		    //
-		    function getPhoto(source) {
-		      // Retrieve image file location from specified source
-		      navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50, 
-		        destinationType: destinationType.FILE_URI,
-		        sourceType: source });
-		    }
-		
-		    // Called if something bad happens.
-		    // 
-		    function onFail(message) {
-		      alert('Failed because: ' + message);
-		    }
-		
-		    </script>
+		    
+			
+		</script>
 		
 	</head> 
 	<body> 
@@ -102,17 +68,17 @@
 		<div data-role="page">
 		
 			<div data-role="header" data-position="fixed">
-				<h1>ShitoRyu</h1>
-			</div><!-- /header -->
+				<h1>Alumnos</h1>
+			</div>
 		
-			<div data-role="content">	
-				<button onclick="capturePhoto();">Capture Photo</button> <br>
-			    <button onclick="capturePhotoEdit();">Capture Editable Photo</button> <br>
-			    <button onclick="getPhoto(pictureSource.PHOTOLIBRARY);">From Photo Library</button><br>
-			    <button onclick="getPhoto(pictureSource.SAVEDPHOTOALBUM);">From Photo Album</button><br>
-			    <img style="display:none;width:60px;height:60px;" id="smallImage" src="" />
-			    <img style="display:none;" id="largeImage" src="" />
-			</div><!-- /content -->
+			<div data-role="content">
+				<ul data-role="listview" data-theme="g" ID="ulAlumnos">
+				</ul>
+				<form id="frmAgregar">
+					<input type="text" name="name" data-mini="true" id="txtNombre" value="" />
+					<input type="button" id="btoAgregar" value="Agregar"/>
+				</form>
+			</div>
 		
 			<div data-role="footer" data-position="fixed">
 				<h1>Pie</h1>
