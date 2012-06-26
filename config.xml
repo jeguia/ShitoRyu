@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<widget xmlns = "http://www.w3.org/ns/widgets" xmlns:gap = "http://phonegap.com/ns/1.0" id= "com.shitoryu.example" versionCode="1" version = "1">
+    <name>ShitoRyu</name>
+    <description>
+        Aplicación de prueba 
+    </description>
+
+    <author href="http://www.sector04.com" email="info@sector04.com">
+        Sector04 
+    </author>
+    <preference name="permissions" value="none"/>
+	<feature name="http://api.phonegap.com/1.0/camera"/>
+	<feature name="http://api.phonegap.com/1.0/file"/>
+</widget>
